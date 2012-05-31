@@ -34,10 +34,10 @@
 		</secton>
 
 		<script type="text/javascript">
-			// Infinite scrolling MITx 6002x textbook
+			// Scrollable MITx 6.002x textbook
 			// A quick hack by Mike Bourgeous (nitrogenaudio.com/contact.html)
 
-			var IS_TXT = IS_TXT || {
+			var SCR_TXT = SCR_TXT || {
 				firstPage: 0, // First physical page number (i.e. number of first image)
 				lastPage: 1008, // Number of last image
 				pageOne: 25, // Physical page number of page 1
@@ -51,9 +51,10 @@
 				totalPages: 4, // Total number of pages to keep loaded
 			};
 
-			function infiniteScrollingTextbook() {
+			// Namespace pollution avoidance wrapper for scrollable textbook initialization.
+			$(function() {
 				// Pads nbr to at least the given number of digits using leading zeros.
-				IS_TXT.zeroPad = function(nbr, digits) {
+				SCR_TXT.zeroPad = function(nbr, digits) {
 					var zeros = digits - nbr.toString().length;
 					var str = '';
 
@@ -69,8 +70,8 @@
 				// neither range will entirely enclose the other, with leftover elements on
 				// both ends.  Range1 and range2 should both be two-numeric-element arrays.
 				// The original arrays are not modified.
-			// Example: IS_TXT.excludeRange([15, 20], [19, 24]) returns [21, 24].
-				IS_TXT.excludeRange = function(range1, range2) {
+				// Example: SCR_TXT.excludeRange([15, 20], [19, 24]) returns [21, 24].
+				SCR_TXT.excludeRange = function(range1, range2) {
 					var min1 = range1[0];
 					var max1 = range1[1];
 					var min2 = range2[0];
@@ -101,69 +102,69 @@
 				}
 
 				// Creates an unloaded img tag for the given page number.
-				IS_TXT.makeImage = function(pageno) {
-					var pageStr = IS_TXT.zeroPad(pageno, IS_TXT.pageDigits);
+				SCR_TXT.makeImage = function(pageno) {
+					var pageStr = SCR_TXT.zeroPad(pageno, SCR_TXT.pageDigits);
 					var image = document.createElement('img');
 					$(image).attr('id', 'page_' + pageno)
-						.attr('alt', 'Page ' + (pageno - IS_TXT.pageOne + 1))
-						.attr('data-src', '' + IS_TXT.urlPrefix + pageStr + IS_TXT.urlSuffix)
-						.css('width', '' + (IS_TXT.pageWidth) + 'px')
-						.css('height', '' + (IS_TXT.pageHeight) + 'px')
+						.attr('alt', 'Page ' + (pageno - SCR_TXT.pageOne + 1))
+						.attr('data-src', '' + SCR_TXT.urlPrefix + pageStr + SCR_TXT.urlSuffix)
+						.css('width', '' + (SCR_TXT.pageWidth) + 'px')
+						.css('height', '' + (SCR_TXT.pageHeight) + 'px')
 						.css('margin', '0')
 						.css('padding', '0');
 					return image;
 				}
 
 				// Creates a section with unloaded img tag for the given page number.
-				IS_TXT.makePage = function(pageno) {
+				SCR_TXT.makePage = function(pageno) {
 					var section = document.createElement('section');
 					$(section).attr('class', 'page')
-						.css('width', '' + (IS_TXT.pageWidth) + 'px')
-						.css('height', '' + (IS_TXT.pageHeight) + 'px')
+						.css('width', '' + (SCR_TXT.pageWidth) + 'px')
+						.css('height', '' + (SCR_TXT.pageHeight) + 'px')
 						.css('border', 'solid 1px black')
 						.css('margin', '10px auto')
 						.css('padding', '10px')
-						.html(IS_TXT.makeImage(pageno));
+						.html(SCR_TXT.makeImage(pageno));
 					return section;
 				}
 
 				// Returns the currently visible page number based on scroll bar position.
 				// Includes fractional page amount.
-				IS_TXT.currentPage = function() {
-					var offset = $(document).scrollTop() + $(window).height() / 2 - IS_TXT.scrollStart;
-					var pageno = offset / IS_TXT.scrollOffset + IS_TXT.firstPage;
+				SCR_TXT.currentPage = function() {
+					var offset = $(document).scrollTop() + $(window).height() / 2 - SCR_TXT.scrollStart;
+					var pageno = offset / SCR_TXT.scrollOffset + SCR_TXT.firstPage;
 
-					return Math.min(Math.max(pageno, IS_TXT.firstPage), IS_TXT.lastPage);
+					return Math.min(Math.max(pageno, SCR_TXT.firstPage), SCR_TXT.lastPage);
 				}
 
 				// Returns the integer logical page number of the currently visible page.
-				IS_TXT.currentLogicalPage = function() {
-					return Math.floor(IS_TXT.currentPage() - IS_TXT.pageOne + 1);
+				SCR_TXT.currentLogicalPage = function() {
+					return Math.floor(SCR_TXT.currentPage() - SCR_TXT.pageOne + 1);
 				}
 
 				// Returns the minimum and maximum pages to load, inclusive.
 				// If pageno is unspecified, the current page will be used.
-				IS_TXT.pageRange = function(pageno) {
-					pageno = pageno || IS_TXT.currentPage();
-					var minPage = Math.floor(pageno) - IS_TXT.pagesBefore;
-					var maxPage = minPage + IS_TXT.totalPages - 1;
+				SCR_TXT.pageRange = function(pageno) {
+					pageno = pageno || SCR_TXT.currentPage();
+					var minPage = Math.floor(pageno) - SCR_TXT.pagesBefore;
+					var maxPage = minPage + SCR_TXT.totalPages - 1;
 
-					minPage = Math.min(Math.max(minPage, IS_TXT.firstPage), IS_TXT.lastPage);
-					maxPage = Math.min(Math.max(maxPage, IS_TXT.firstPage), IS_TXT.lastPage);
+					minPage = Math.min(Math.max(minPage, SCR_TXT.firstPage), SCR_TXT.lastPage);
+					maxPage = Math.min(Math.max(maxPage, SCR_TXT.firstPage), SCR_TXT.lastPage);
 
 					return [minPage, maxPage];
 				}
 
 				// Loads the pages within the specified range, inclusive.  The range
 				// may be specified as a two-element integer array passed in min.
-				IS_TXT.loadPages = function(min, max) {
+				SCR_TXT.loadPages = function(min, max) {
 					if(min instanceof Array) {
 						max = min[1];
 						min = min[0];
 					}
 
 					for(var i = min; i <= max; i++) {
-						var img = $(IS_TXT.pages[i - IS_TXT.firstPage]).find('img');
+						var img = $(SCR_TXT.pages[i - SCR_TXT.firstPage]).find('img');
 						img.attr('src', img.attr('data-src'))
 							.css('border', 'solid 1px #ccc');
 					}
@@ -171,72 +172,70 @@
 
 				// Unloads the pages within the specified range, inclusive.  The range
 				// may be specified as a two-element integer array passed in min.
-				IS_TXT.unloadPages = function(min, max) {
+				SCR_TXT.unloadPages = function(min, max) {
 					if(min instanceof Array) {
 						max = min[1];
 						min = min[0]
 					}
 
 					for(var i = min; i <= max; i++) {
-						var page = $(IS_TXT.pages[i - IS_TXT.firstPage]);
-						page.html(IS_TXT.makeImage(i))
+						var page = $(SCR_TXT.pages[i - SCR_TXT.firstPage]);
+						page.html(SCR_TXT.makeImage(i))
 					}
 				}
 
 				// Scrolls to the top of the given page
-				IS_TXT.scrollToPage = function(pageno) {
-					$(document).scrollTop($(IS_TXT.pages[pageno - IS_TXT.firstPage]).offset().top - 10);
+				SCR_TXT.scrollToPage = function(pageno) {
+					$(document).scrollTop($(SCR_TXT.pages[pageno - SCR_TXT.firstPage]).offset().top - 10);
 				}
 
 				// Loads and unloads pages based on the current scroll position.
-				IS_TXT.updateScroll = function() {
-					// TODO
-
-					var pageno = IS_TXT.currentPage();
+				SCR_TXT.updateScroll = function() {
+					var pageno = SCR_TXT.currentPage();
 					console.log("XXX: Current page is " + pageno);
 
-					if(Math.floor(pageno) != Math.floor(IS_TXT.lastPageno)) {
-						console.log("Integer page number " + Math.floor(pageno) + " differs from previous: " + Math.floor(IS_TXT.lastPageno));
+					if(Math.floor(pageno) != Math.floor(SCR_TXT.lastPageno)) {
+						console.log("Integer page number " + Math.floor(pageno) + " differs from previous: " + Math.floor(SCR_TXT.lastPageno));
 
-						var oldRange = IS_TXT.lastPagerange || [-1, -1];
-						var newRange = IS_TXT.pageRange(pageno);
-						var unloadRange = IS_TXT.excludeRange(newRange, oldRange);
-						var loadRange = IS_TXT.excludeRange(oldRange, newRange);
+						var oldRange = SCR_TXT.lastPagerange || [-1, -1];
+						var newRange = SCR_TXT.pageRange(pageno);
+						var unloadRange = SCR_TXT.excludeRange(newRange, oldRange);
+						var loadRange = SCR_TXT.excludeRange(oldRange, newRange);
 
 						console.log("Previous range: " + oldRange);
 						console.log("New range: " + newRange);
 						console.log("Pages to unload: " + unloadRange);
 						console.log("Pages to load: " + loadRange);
 
-						IS_TXT.unloadPages(unloadRange);
-						IS_TXT.loadPages(loadRange);
+						SCR_TXT.unloadPages(unloadRange);
+						SCR_TXT.loadPages(loadRange);
 
-						IS_TXT.lastPageno = pageno;
-						IS_TXT.lastPagerange = newRange;
+						SCR_TXT.lastPageno = pageno;
+						SCR_TXT.lastPagerange = newRange;
 					}
 				}
 
 				// Initializes the Infinite Scrolling Textbook.  Creates DOM elements
 				// for every page, sets scroll handlers to load visible pages.
-				IS_TXT.init = function() {
+				SCR_TXT.init = function() {
 					var container = $('section.page, section.page-container')
 						.first().attr('class', 'page-container')
 						.text('');
 
-					IS_TXT.pages = [];
-					for(var i = IS_TXT.firstPage; i <= IS_TXT.lastPage; i++) {
-						IS_TXT.pages[i - IS_TXT.firstPage] = IS_TXT.makePage(i);
-						container.append(IS_TXT.pages[i]);
+					SCR_TXT.pages = [];
+					for(var i = SCR_TXT.firstPage; i <= SCR_TXT.lastPage; i++) {
+						SCR_TXT.pages[i - SCR_TXT.firstPage] = SCR_TXT.makePage(i);
+						container.append(SCR_TXT.pages[i]);
 					}
 
-					IS_TXT.scrollStart = $(IS_TXT.pages[0]).offset().top;
-					IS_TXT.scrollOffset = $(IS_TXT.pages[1]).offset().top - IS_TXT.scrollStart;
+					SCR_TXT.scrollStart = $(SCR_TXT.pages[0]).offset().top;
+					SCR_TXT.scrollOffset = $(SCR_TXT.pages[1]).offset().top - SCR_TXT.scrollStart;
 
-					$(document).scroll(IS_TXT.updateScroll);
-					IS_TXT.updateScroll();
+					$(document).scroll(SCR_TXT.updateScroll);
+					SCR_TXT.updateScroll();
 				}
 
-				IS_TXT.init();
+				SCR_TXT.init();
 
 				var old_goto_page = window.goto_page;
 				window.goto_page = function(pageno) {
@@ -244,10 +243,9 @@
 						old_goto_page(pageno);
 					}
 
-					IS_TXT.scrollToPage(pageno);
+					SCR_TXT.scrollToPage(pageno);
 				}
-			}
-			$(infiniteScrollingTextbook);
+			});
 		</script>
 	</body>
 </html>
