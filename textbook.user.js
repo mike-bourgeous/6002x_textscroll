@@ -9,6 +9,8 @@
 
 // Scrollable MITx 6.002x textbook
 // A quick hack by Mike Bourgeous (nitrogenaudio.com/contact.html)
+// (C)2012 Mike Bourgeous - CC-BY or 2-clause BSD (see the README on github)
+// https://github.com/nitrogenlogic/6002x_textscroll
 //
 // Ideas for improvement:
 //  - Use <canvas> to sharpen textbook images
