@@ -211,6 +211,7 @@
 
 					if(Math.floor(pageno) != Math.floor(SCR_TXT.lastPageno)) {
 						console.log("Integer page number " + Math.floor(pageno) + " differs from previous: " + Math.floor(SCR_TXT.lastPageno));
+						SCR_TXT.pageNumberOverlay.text(Math.floor(pageno - SCR_TXT.pageOne + 1));
 
 						if(pageLoadTimer) {
 							clearTimeout(pageLoadTimer);
@@ -232,9 +233,27 @@
 						container.append(SCR_TXT.pages[i]);
 					}
 
+					SCR_TXT.pageNumberOverlay = $(document.createElement('div'))
+						.attr('id', 'page-number-overlay')
+						.attr('class', 'header-wrapper')
+						.css('position', 'fixed')
+						.css('top', '0')
+						.css('right', '0')
+						.css('width', '2em')
+						.css('height', '22px')
+						.css('line-height', '18px')
+						.css('font-size', '25px')
+						.css('border-bottom-left-radius', '12px')
+						.css('padding', '9px 25px')
+						.css('text-align', 'center')
+						.css('background', '#821')
+						.css('color', '#fcfcfc')
+						.css('text-shadow', '1px 1px 1px #200')
+						.text('0');
+					document.body.appendChild(SCR_TXT.pageNumberOverlay[0]);
+
 					SCR_TXT.scrollStart = $(SCR_TXT.pages[0]).offset().top;
 					SCR_TXT.scrollOffset = $(SCR_TXT.pages[1]).offset().top - SCR_TXT.scrollStart;
-
 					$(document).scroll(SCR_TXT.updateScroll);
 					SCR_TXT.updateScroll();
 				}
