@@ -214,7 +214,11 @@ $(function() {
 			// MITx original page selection logging
 			// log_event("book", {"type":"gotopage","old":Math.floor(SRC_TXT.lastPageno),"new":Math.floor(pageno)});
 
-			SCR_TXT.pageNumberOverlay.text(Math.floor(pageno - SCR_TXT.pageOne + 1));
+			if(pageno < SCR_TXT.pageOne) {
+				SCR_TXT.pageNumberOverlay.text('i-' + Math.floor(pageno));
+			} else {
+				SCR_TXT.pageNumberOverlay.text(Math.floor(pageno - SCR_TXT.pageOne + 1));
+			}
 
 			if(pageLoadTimer) {
 				clearTimeout(pageLoadTimer);
