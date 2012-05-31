@@ -27,7 +27,8 @@
 			// Scrollable MITx 6.002x textbook
 			// A quick hack by Mike Bourgeous (nitrogenaudio.com/contact.html)
 
-			var SCR_TXT = SCR_TXT || {
+			var SCR_TXT = {
+				// Book structure settings
 				firstPage: 0, // First physical page number (i.e. number of first image)
 				lastPage: 1008, // Number of last image
 				pageOne: 25, // Physical page number of page 1
@@ -37,8 +38,10 @@
 				urlPrefix: window.location.search.substring(1),
 				urlSuffix: '.png',
 
+				// Network behavior settings
 				pagesBefore: 1, // Number of pages to load before the current page (should be >= 1)
 				totalPages: 4, // Total number of pages to keep loaded
+				loadInterval: 150, // Minimum number of milliseconds to wait between page loads
 			};
 
 			// Namespace pollution avoidance wrapper for scrollable textbook initialization.
@@ -179,7 +182,28 @@
 					$(document).scrollTop($(SCR_TXT.pages[pageno - SCR_TXT.firstPage]).offset().top - 10);
 				}
 
-				// Loads and unloads pages based on the current scroll position.
+				// Loads and unloads pages in a timer set by SCR_TXT.updateScroll().
+				SCR_TXT.loadNewPages = function() {
+					var pageno = SCR_TXT.currentPage();
+					var oldRange = SCR_TXT.lastPagerange || [-1, -1];
+					var newRange = SCR_TXT.pageRange(pageno);
+					var unloadRange = SCR_TXT.excludeRange(newRange, oldRange);
+					var loadRange = SCR_TXT.excludeRange(oldRange, newRange);
+
+					console.log("Previous range: " + oldRange);
+					console.log("New range: " + newRange);
+					console.log("Pages to unload: " + unloadRange);
+					console.log("Pages to load: " + loadRange);
+
+					SCR_TXT.unloadPages(unloadRange);
+					SCR_TXT.loadPages(loadRange);
+
+					SCR_TXT.lastPageno = pageno;
+					SCR_TXT.lastPagerange = newRange;
+				}
+
+				// Schedules loading and unloading of pages based on the current scroll position.
+				var pageLoadTimer;
 				SCR_TXT.updateScroll = function() {
 					var pageno = SCR_TXT.currentPage();
 					console.log("XXX: Current page is " + pageno);
@@ -187,21 +211,10 @@
 					if(Math.floor(pageno) != Math.floor(SCR_TXT.lastPageno)) {
 						console.log("Integer page number " + Math.floor(pageno) + " differs from previous: " + Math.floor(SCR_TXT.lastPageno));
 
-						var oldRange = SCR_TXT.lastPagerange || [-1, -1];
-						var newRange = SCR_TXT.pageRange(pageno);
-						var unloadRange = SCR_TXT.excludeRange(newRange, oldRange);
-						var loadRange = SCR_TXT.excludeRange(oldRange, newRange);
-
-						console.log("Previous range: " + oldRange);
-						console.log("New range: " + newRange);
-						console.log("Pages to unload: " + unloadRange);
-						console.log("Pages to load: " + loadRange);
-
-						SCR_TXT.unloadPages(unloadRange);
-						SCR_TXT.loadPages(loadRange);
-
-						SCR_TXT.lastPageno = pageno;
-						SCR_TXT.lastPagerange = newRange;
+						if(pageLoadTimer) {
+							clearTimeout(pageLoadTimer);
+						}
+						pageLoadTimer = setTimeout(SCR_TXT.loadNewPages, SCR_TXT.loadInterval);
 					}
 				}
 
@@ -227,6 +240,8 @@
 
 				SCR_TXT.init();
 
+				// Hook into the existing page selection functions so the side panel
+				// bookmarks work.
 				var old_goto_page = window.goto_page;
 				window.goto_page = function(pageno) {
 					if(old_goto_page) {
