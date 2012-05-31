@@ -1,3 +1,12 @@
+// ==UserScript==
+// @name        MITx 6.002x Scrollable Textbook
+// @namespace   nitrogenaudio
+// @description Provides efficient full-length scrolling of the MITx 6.002x textbook.
+// @include     https://6002x.mitx.mit.edu/book*
+// @require	https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js
+// @version     1.0
+// ==/UserScript==
+
 // Scrollable MITx 6.002x textbook
 // A quick hack by Mike Bourgeous (nitrogenaudio.com/contact.html)
 //
@@ -8,6 +17,8 @@
 //  - Update URL hash with the current page number
 //  - Allow typing a page number into the page number overlay
 
+var console = unsafeWindow.console;
+
 var SCR_TXT = {
 	// Book structure settings
 	firstPage: 0, // First physical page number (i.e. number of first image)
@@ -16,7 +27,7 @@ var SCR_TXT = {
 	pageDigits: 3, // Minimum number of digits in image filenames
 	pageWidth: 960, // Width of a page in pixels
 	pageHeight: 1080, // Height of a page in pixels
-	urlPrefix: window.location.search.substring(1),
+	urlPrefix: unsafeWindow.location.search.substring(1),
 	urlSuffix: '.png',
 
 	// Network behavior settings
@@ -82,11 +93,14 @@ $(function() {
 		$(image).attr('id', 'page_' + pageno)
 			.attr('alt', 'Page ' + (pageno - SCR_TXT.pageOne + 1))
 			.attr('data-src', '' + SCR_TXT.urlPrefix + pageStr + SCR_TXT.urlSuffix)
-			.css('width', '' + (SCR_TXT.pageWidth) + 'px')
-			.css('height', '' + (SCR_TXT.pageHeight) + 'px')
+			.css('max-width', '' + (SCR_TXT.pageWidth) + 'px')
+			.css('max-height', '' + (SCR_TXT.pageHeight) + 'px')
+			.css('width', '100%')
+			.css('height', 'auto')
 			.css('margin', '0')
 			.css('display', 'inline-block')
-			.css('padding', '0');
+			.css('padding', '0')
+			.css('border', 'solid 1px #ccc');
 		return image;
 	}
 
@@ -94,8 +108,9 @@ $(function() {
 	SCR_TXT.makePage = function(pageno) {
 		var section = document.createElement('section');
 		$(section).attr('class', 'page')
-			.css('width', '' + (SCR_TXT.pageWidth) + 'px')
+			.css('max-width', '' + (SCR_TXT.pageWidth) + 'px')
 			.css('height', '' + (SCR_TXT.pageHeight) + 'px')
+			.css('background', '#fff')
 			.css('border', 'solid 1px black')
 			.css('margin', '10px auto')
 			.css('padding', '10px')
@@ -106,7 +121,7 @@ $(function() {
 	// Returns the currently visible page number based on scroll bar position.
 	// Includes fractional page amount.
 	SCR_TXT.currentPage = function() {
-		var offset = $(document).scrollTop() + $(window).height() / 2 - SCR_TXT.scrollStart;
+		var offset = $(document).scrollTop() + $(unsafeWindow).height() / 2 - SCR_TXT.scrollStart;
 		var pageno = offset / SCR_TXT.scrollOffset + SCR_TXT.firstPage;
 
 		return Math.min(Math.max(pageno, SCR_TXT.firstPage), SCR_TXT.lastPage);
@@ -141,7 +156,7 @@ $(function() {
 		for(var i = min; i <= max; i++) {
 			var img = $(SCR_TXT.pages[i - SCR_TXT.firstPage]).find('img');
 			img.attr('src', img.attr('data-src'))
-				.css('border', 'solid 1px #ccc');
+				.css('border', 'none');
 		}
 	}
 
@@ -187,8 +202,10 @@ $(function() {
 	// Schedules loading and unloading of pages based on the current scroll position.
 	var pageLoadTimer;
 	SCR_TXT.updateScroll = function() {
-		var pageno = SCR_TXT.currentPage();
+		SCR_TXT.scrollStart = $(SCR_TXT.pages[0]).offset().top;
+		SCR_TXT.scrollOffset = $(SCR_TXT.pages[1]).offset().top - SCR_TXT.scrollStart;
 
+		var pageno = SCR_TXT.currentPage();
 		console.log("Current page is " + pageno);
 
 		if(Math.floor(pageno) != Math.floor(SCR_TXT.lastPageno)) {
@@ -255,8 +272,6 @@ $(function() {
 		document.body.appendChild(SCR_TXT.pageNumberOverlay[0]);
 
 		// Set up scroll event handler
-		SCR_TXT.scrollStart = $(SCR_TXT.pages[0]).offset().top;
-		SCR_TXT.scrollOffset = $(SCR_TXT.pages[1]).offset().top - SCR_TXT.scrollStart;
 		$(document).scroll(SCR_TXT.updateScroll);
 		SCR_TXT.updateScroll();
 	}
@@ -265,8 +280,8 @@ $(function() {
 
 	// Hook into the existing page selection functions so the side panel
 	// bookmarks work.
-	var old_goto_page = window.goto_page;
-	window.goto_page = function(pageno) {
+	var old_goto_page = unsafeWindow.goto_page;
+	unsafeWindow.goto_page = function(pageno) {
 		if(old_goto_page) {
 			old_goto_page(pageno);
 		}
@@ -274,3 +289,5 @@ $(function() {
 		SCR_TXT.scrollToPage(pageno);
 	}
 });
+
+unsafeWindow.SCR_TXT = SCR_TXT;
