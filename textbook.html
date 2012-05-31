@@ -44,7 +44,7 @@
 				pageDigits: 3, // Minimum number of digits in image filenames
 				pageWidth: 960, // Width of a page in pixels
 				pageHeight: 1080, // Height of a page in pixels
-				urlPrefix: '[image_uri]',
+				urlPrefix: window.location.search.substring(1),
 				urlSuffix: '.png',
 
 				pagesBefore: 1, // Number of pages to load before the current page (should be >= 1)
