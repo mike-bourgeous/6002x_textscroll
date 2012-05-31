@@ -4,7 +4,9 @@
 // Ideas for improvement:
 //  - Use <canvas> to sharpen textbook images
 //  - Fix page loading/scrolling when zoomed in or out
-//  - 
+//  - Store page history in browser history
+//  - Update URL hash with the current page number
+//  - Allow typing a page number into the page number overlay
 
 var SCR_TXT = {
 	// Book structure settings
