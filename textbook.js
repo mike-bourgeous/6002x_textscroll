@@ -212,6 +212,12 @@ $(function() {
 	SCR_TXT.init = function() {
 		console.log("Initializing MITx 6.002x scrollable textbook user script.");
 
+		var origImage = document.getElementById('bookpage');
+		if(origImage) {
+			SCR_TXT.urlPrefix = origImage.attributes.src.value.split(/[0-9]{3,}/)[0];
+			console.log("Discovered image URL prefix of " + SCR_TXT.urlPrefix);
+		}
+
 		// Find, reappropriate, and empty our container
 		var container = $('section.page, section.page-container')
 			.first()
