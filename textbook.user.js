@@ -4,7 +4,7 @@
 // @description Provides efficient full-length scrolling of the MITx 6.002x textbook.
 // @include     https://6002x.mitx.mit.edu/book*
 // @require	https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js
-// @version     1.0
+// @version     1.1
 // ==/UserScript==
 
 // Scrollable MITx 6.002x textbook
@@ -17,6 +17,18 @@
 //  - Fix page loading/scrolling when zoomed in or out
 //  - Store more page history in browser history
 //  - Allow typing a page number into the page number overlay
+
+if(!window.unsafeWindow) {
+	// Based on https://gist.github.com/1143845 and http://stackoverflow.com/a/4751049
+	var windowFunc = function() {
+		var div = document.createElement('div');
+		div.setAttribute('onclick', 'return window;');
+		return div.onclick();
+	}
+	unsafeWindow = windowFunc();
+}
+
+var $ = unsafeWindow.jQuery;
 
 var console = unsafeWindow.console;
 
