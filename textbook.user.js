@@ -15,7 +15,6 @@
 //
 // Ideas for improvement:
 //  - Use <canvas> to sharpen textbook images
-//  - Fix page loading/scrolling when zoomed in or out
 //  - Store more page history in browser history
 //  - Allow typing a page number into the page number overlay
 
