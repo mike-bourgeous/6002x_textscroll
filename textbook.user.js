@@ -2,7 +2,8 @@
 // @name        MITx 6.002x Scrollable Textbook
 // @namespace   nitrogenaudio
 // @description Provides efficient full-length scrolling of the MITx 6.002x textbook.
-// @include     https://6002x.mitx.mit.edu/book*
+// @match	http://6002x.mitx.mit.edu/book*
+// @match	https://6002x.mitx.mit.edu/book*
 // @require	https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js
 // @version     1.1
 // ==/UserScript==
