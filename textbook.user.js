@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        MITx 6.002x Scrollable Textbook
 // @namespace   nitrogenaudio
-// @description Provides efficient full-length scrolling of the MITx 6.002x textbook.
+// @description Provides efficient full-length scrolling of the MITx 6.002x textbook (unofficial).
 // @match	http://6002x.mitx.mit.edu/book*
 // @match	https://6002x.mitx.mit.edu/book*
 // @require	https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js
@@ -18,7 +18,17 @@
 //  - Store more page history in browser history
 //  - Allow typing a page number into the page number overlay
 
-if(!window.unsafeWindow) {
+
+// Firefox+Greasemonkey provides a useful unsafeWindow by default, that allows
+// us to replace goto_page() and make SCR_TXT available for use in the console.
+// Chrome provides an unsafeWindow that doesn't actually grant access to the
+// page content, meaning jQuery is unavailable.  The fix for Chrome is getting
+// the original window object by creating an element and setting its onclick
+// handler to a function that returns the window object.  Unfortunately, this
+// breaks in Firefox+Greasemonkey, leaving goto_page() unmodified and SCR_TXT
+// unavailable.  Having failed to find a way of getting both browsers' user
+// script implementations to work, I am resorting to browser detection by name.
+if(window.navigator.vendor.match(/Google/)) {
 	// Based on https://gist.github.com/1143845 and http://stackoverflow.com/a/4751049
 	var windowFunc = function() {
 		var div = document.createElement('div');
@@ -26,6 +36,9 @@ if(!window.unsafeWindow) {
 		return div.onclick();
 	}
 	unsafeWindow = windowFunc();
+} else if(typeof unsafeWindow === 'undefined') {
+	// Running as a native script in the HTML demo page
+	unsafeWindow = window;
 }
 
 var $ = unsafeWindow.jQuery;
@@ -303,7 +316,7 @@ $(function() {
 			old_goto_page(pageno);
 		}
 
-		window.location.hash = '#page_' + pageno;
+		unsafeWindow.location.hash = '#page_' + pageno;
 		SCR_TXT.scrollToPage(pageno);
 	}
 });
